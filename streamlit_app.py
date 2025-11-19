@@ -80,6 +80,34 @@ def from_wad_zone(x_wad: Optional[int]) -> Optional[float]:
 st.set_page_config(page_title="Alienzone Wearables Price Curve", layout="wide")
 st.title("Alienzone Wearables Bonding Curve Visualizer")
 
+st.markdown(
+    r"""
+**How the buy price is computed (simplified)**
+
+- The contract keeps a cumulative price curve `curve(x)`, where `x` is the total sold supply (in full-wearable units, with 18 decimals).
+- For any trade of `amount` wearables, the raw buy price is the **increase on that curve**:
+  $$
+  \text{price} = \text{curve}(\text{supply} + \text{amount}) - \text{curve}(\text{supply})
+  $$
+- Internally, the curve function is defined as (exactly as in the Solidity code):
+$$
+\text{curve}(x) = \text{basePrice}(x) + \text{curvePrice}(x)
+$$
+$$
+\text{basePrice}(x) = \frac{\text{initialPriceFactor} \cdot x}{10^{18}}
+$$
+$$
+\text{curvePrice}(x) = \frac{\text{totalSupply} \cdot \text{curveFactor} \cdot 10^{18}}{\text{totalSupply} - x} - \text{curveFactor} \cdot 10^{18}
+$$
+
+- That curve has two parts:
+  - A **linear base**: grows roughly proportional to sold supply and is set by `initialPriceFactor` (your “base price per 1.0 wearable”).
+  - A **curved term**: controlled by `curveFactor`, which is tiny when plenty of supply is left but rises very fast as remaining supply goes to zero.
+
+All values here use the same integer math and rounding as the Solidity contract, then are converted back to ZONE for display.
+"""
+)
+
 st.header("Parameters")
 col1, col2, col3 = st.columns(3)
 with col1:
