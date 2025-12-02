@@ -130,7 +130,7 @@ with col3:
     curve_factor = st.number_input(
         "curveFactor",
         min_value=1,
-        max_value=1000,
+        max_value=1000000,
         value=25,
         step=1,
     )
